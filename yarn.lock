@@ -5,6 +5,7 @@
 "@tensorflow/tfjs-core@^0.10.1":
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-core/-/tfjs-core-0.10.1.tgz#1764c8c122d5b8a86a8d23c8ffd58bef8e40eda9"
+  integrity sha512-GZ1r8NnqZSqq04haYPcU76ziCliu1BhXaFWnhVtEpoBsY2DwZ78f+4EbzAh2nX8zjwkB/0UYzEaZC0UZpF4DIA==
   dependencies:
     seedrandom "~2.4.3"
 
@@ -2908,8 +2909,9 @@ sax@^1.2.4:
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
 seedrandom@~2.4.3:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.3.tgz#2438504dad33917314bff18ac4d794f16d6aaecc"
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.4.tgz#b25ea98632c73e45f58b77cfaa931678df01f9ba"
+  integrity sha512-9A+PDmgm+2du77B5i0Ip2cxOqqHjgNxnBgglxLcX78A2D6c2rTo61z4jnVABpF4cKeDMDG+cmXXvdnqse2VqMA==
 
 "semver@2 || 3 || 4 || 5", semver@^5.3.0:
   version "5.6.0"

@@ -21,6 +21,7 @@ import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
 import * as tsne_util from './tsne_optimizer_util';
+import DEBUG_MODE from './debug-mode';
 
 export class TSNEOptimizer {
   // Interactive parameters
@@ -102,7 +103,7 @@ export class TSNEOptimizer {
 
   // getters and settters for tSNE GD parameters
   get exaggerationAtCurrentIteration(): number {
-    return this._exaggeration.get();
+    return this._exaggeration.bufferSync().get();
   }
   get exaggeration(): number|Array<{iteration : number, value: number}> {
     return this.rawExaggeration;
@@ -139,7 +140,7 @@ export class TSNEOptimizer {
     this.updateExaggeration();
   }
 
-  get momentum(): number { return this._momentum.get(); }
+  get momentum(): number { return this._momentum.bufferSync().get(); }
   set momentum(mom: number) {
     if (mom < 0 || mom > 1) {
       throw Error('Momentum must be in the [0,1] range');
@@ -184,7 +185,7 @@ export class TSNEOptimizer {
     this.gpgpu = this.backend.getGPGPUContext();
 
     // Check for the float interpolation extension
-    tf.webgl.webgl_util.getExtensionOrThrow(this.gpgpu.gl,
+    tf.webgl.webgl_util.getExtensionOrThrow(this.gpgpu.gl, DEBUG_MODE,
                                             'OES_texture_float_linear');
 
     // The points are organized as xyxyxy... with a pixel per dimension
@@ -674,7 +675,7 @@ export class TSNEOptimizer {
     }
 
     this.splatVertexIdBuffer = tf.webgl.webgl_util.createStaticVertexBuffer(
-        this.gpgpu.gl, splatVertexId);
+        this.gpgpu.gl, DEBUG_MODE, splatVertexId);
 
     // Compute the interpolated value of Q (first channel)
     this.qInterpolatorProgram =

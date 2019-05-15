@@ -21,6 +21,7 @@ import * as dataset_util from './dataset_util';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
+import DEBUG_MODE from './debug-mode';
 
 // tslint:disable-next-line:no-any
 function instanceOfRearrangedData(object: any): object is RearrangedData {
@@ -180,7 +181,7 @@ export class KNNEstimator {
     }
     this.log('knn Create static vertex start');
     this.linesVertexIdBuffer = tf.webgl.webgl_util.createStaticVertexBuffer(
-        this.gpgpu.gl, linesVertexId);
+        this.gpgpu.gl, DEBUG_MODE, linesVertexId);
     this.log('knn Create programs/buffers done');
   }
 

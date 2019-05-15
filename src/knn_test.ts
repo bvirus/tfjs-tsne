@@ -171,7 +171,7 @@ function linearTensorAccess(tensor: tf.Tensor, i: number): number {
   const elemPerRow = tensor.shape[1];
   const col = i % elemPerRow;
   const row = Math.floor(i / elemPerRow);
-  return tensor.get(row, col);
+  return tensor.bufferSync().get(row, col);
 }
 
 // Check if the returned kNN preserves the heap property
