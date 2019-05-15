@@ -16,7 +16,7 @@
  */
 
 import * as tf from '@tensorflow/tfjs-core';
-import DEBUG_MODE from './debug-mode'
+import DEBUG_MODE from './debug_mode'
 //////////////////////  GPGPU_CONTEXT  /////////////////////////////
 // Method of the GPGPUContext class
 

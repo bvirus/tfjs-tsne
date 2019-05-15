@@ -21,7 +21,8 @@ import * as dataset_util from './dataset_util';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
-import DEBUG_MODE from './debug-mode';
+import DEBUG_MODE from './debug_mode';
+import getGPGPUContext from './get_GPGPU_context';
 
 // tslint:disable-next-line:no-any
 function instanceOfRearrangedData(object: any): object is RearrangedData {
@@ -75,8 +76,8 @@ export class KNNEstimator {
       verbose = false;
     }
     // Saving the GPGPU context
-    this.backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
-    this.gpgpu = this.backend.getGPGPUContext();
+    // this.backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
+    this.gpgpu = getGPGPUContext();
 
     this._iteration = 0;
     this.dataTexture = dataTexture;

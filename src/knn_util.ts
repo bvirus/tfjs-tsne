@@ -17,7 +17,7 @@
 
 import * as tf from '@tensorflow/tfjs-core';
 import * as gl_util from './gl_util';
-import DEBUG_MODE from './debug-mode';
+import DEBUG_MODE from './debug_mode';
 
 export interface RearrangedData {
   numPoints: number;

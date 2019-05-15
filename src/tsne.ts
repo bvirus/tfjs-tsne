@@ -38,7 +38,7 @@ export interface TSNEConfiguration {
  * WebGL capabilities.
  */
 export function maximumPerplexity() {
-  const backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
+  const backend = tf.backend() as tf.webgl.MathBackendWebGL;
   if (backend === null) {
     throw Error('WebGL backend is not available');
   }

@@ -21,7 +21,7 @@ import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
 import * as tsne_util from './tsne_optimizer_util';
-import DEBUG_MODE from './debug-mode';
+import DEBUG_MODE from './debug_mode';
 
 export class TSNEOptimizer {
   // Interactive parameters
@@ -178,7 +178,7 @@ export class TSNEOptimizer {
       throw Error('WebGL version 1 is not supported by tfjs-tsne');
     }
     // Saving the GPGPU context
-    this.backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
+    this.backend =  tf.backend() as tf.webgl.MathBackendWebGL;
     if (this.backend === null) {
       throw Error('WebGL backend is not available');
     }

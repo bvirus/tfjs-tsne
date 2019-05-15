@@ -20,6 +20,7 @@ import * as tf from '@tensorflow/tfjs-core';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as tf_knn from './knn';
+import { getGLContext } from './get_GPGPU_context';
 
 function iterate(knn: tf_knn.KNNEstimator, knnTechnique: string) {
   if (knnTechnique === 'brute force') {
@@ -114,10 +115,9 @@ describe('KNN [line]\n', () => {
       vec[i * numDimensions + d] = 255. * i / numPoints;
     }
   }
-  const backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
-  const gpgpu = backend.getGPGPUContext();
+  const gl = getGLContext();
   const dataTexture = gl_util.createAndConfigureUByteTexture(
-      gpgpu.gl, pointsPerRow * numDimensions / 4, numRows, 4, vec);
+      gl, pointsPerRow * numDimensions / 4, numRows, 4, vec);
 
   const dataFormat = {
     numPoints,
