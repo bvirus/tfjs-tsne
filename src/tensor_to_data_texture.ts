@@ -25,7 +25,7 @@ import {RearrangedData} from './interfaces';
  * @param {tfc.Tensor} Tensor to convert
  * @return {Promise} Promise of an Obeject containing the texture and shape
  */
-export async function tensorToDataTexture(tensor: tf.Tensor):
+export async function tensorToDataTexture(backend: tf.webgl.MathBackendWebGL, tensor: tf.Tensor):
     Promise<{shape: RearrangedData, texture: WebGLTexture}> {
   const inputShape = tensor.shape;
   if (inputShape.length !== 2) {
@@ -33,7 +33,6 @@ export async function tensorToDataTexture(tensor: tf.Tensor):
   }
 
   // Getting the context for initializing the texture
-  const backend =  tf.backend() as tf.webgl.MathBackendWebGL;
   if (backend === null) {
     throw Error('WebGL backend is not available');
   }

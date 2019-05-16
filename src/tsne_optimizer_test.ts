@@ -19,9 +19,13 @@ import * as tf from '@tensorflow/tfjs-core';
 import * as dataset_util from './dataset_util';
 import * as tf_tsne from './tsne_optimizer';
 
-describe('TSNEOptimizer class', () => {
+describe('TSNEOptimizer class', async () => {
+  tf.setBackend('webgl');
+  
+  let backend = tf.backend() as tf.webgl.MathBackendWebGL;
+  await tf.ready()
   it('is initialized correctly', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(tsne.minX).toBeLessThan(tsne.maxX);
     expect(tsne.minY).toBeLessThan(tsne.maxY);
     expect(tsne.numberOfPoints).toBe(100);
@@ -31,7 +35,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('requires the neighborhoods to perform iterations', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     try {
       await tsne.iterate();
     } catch (e) {
@@ -44,7 +48,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('returns a properly sized embedding', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const embedding2D = tsne.embedding2D;
     expect(embedding2D.shape[0]).toBe(100);
     expect(embedding2D.shape[1]).toBe(2);
@@ -53,7 +57,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('detects a mismatched data shape', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const knnGraph = dataset_util.generateKNNClusterData(1000, 10, 100);
 
     try {
@@ -70,20 +74,20 @@ describe('TSNEOptimizer class', () => {
 
   it('requires 4 tensors', () => {
     // Embedding + Gradiend + momentum + exaggeration
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     expect(tf.memory().numTensors).toBe(4);
     tsne.dispose();
   });
 
   it('disposes its tensors', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     tsne.dispose();
     expect(tf.memory().numTensors).toBe(0);
   });
 
   it('keeps the number of tensors constant during neighbors initialization',
      async () => {
-       const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+       const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
 
        const knnGraph = dataset_util.generateKNNClusterData(1000, 10, 100);
        await tsne.initializeNeighborsFromKNNGraph(
@@ -94,7 +98,7 @@ describe('TSNEOptimizer class', () => {
      });
 
   it('keeps the number of tensors constant during SGD', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     const knnGraph = dataset_util.generateKNNClusterData(1000, 10, 30);
     await tsne.initializeNeighborsFromKNNGraph(
         1000, 30, knnGraph.distances, knnGraph.indices);
@@ -109,13 +113,13 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('initializes the iterations to 0', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     expect(tsne.iteration).toBe(0);
     tsne.dispose();
   });
 
   it('counts the iterations', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     const knnGraph = dataset_util.generateKNNClusterData(1000, 10, 30);
     await tsne.initializeNeighborsFromKNNGraph(
         1000, 30, knnGraph.distances, knnGraph.indices);
@@ -130,7 +134,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('resets the iterations counter on re-init', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(1000, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 1000, false);
     const knnGraph = dataset_util.generateKNNClusterData(1000, 10, 30);
     await tsne.initializeNeighborsFromKNNGraph(
         1000, 30, knnGraph.distances, knnGraph.indices);
@@ -146,7 +150,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper ETA getter/setter', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(tsne.eta).toBeCloseTo(2500);
     tsne.eta = 1000;
     expect(tsne.eta).toBeCloseTo(1000);
@@ -154,7 +158,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper Momentum getter/setter', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(tsne.momentum).toBeCloseTo(0.8);
     tsne.momentum = 0.1;
     expect(tsne.momentum).toBeCloseTo(0.1);
@@ -162,7 +166,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper Exaggeration getter/setter', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(tsne.exaggerationAtCurrentIteration).toBeCloseTo(4);
     tsne.exaggeration = 3;
     expect(tsne.exaggerationAtCurrentIteration).toBeCloseTo(3);
@@ -170,7 +174,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('does not increase the tensor count when momentum is changed', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const numTensors = tf.memory().numTensors;
     tsne.momentum = 0.1;
     expect(tf.memory().numTensors).toBe(numTensors);
@@ -178,7 +182,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('does not increase the tensor count when exaggeration is changed', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const numTensors = tf.memory().numTensors;
     tsne.exaggeration = 4;
     expect(tf.memory().numTensors).toBe(numTensors);
@@ -186,7 +190,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('does not increase the tensor count after an embedding re-init', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const numTensors = tf.memory().numTensors;
     tsne.initializeEmbedding();
     expect(tf.memory().numTensors).toBe(numTensors);
@@ -194,7 +198,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('throws if a negative momentum is set', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.momentum = -0.1;
     }).toThrow();
@@ -202,7 +206,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('does not throw if momentum is set to zero', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.momentum = 0.;
     }).not.toThrow();
@@ -210,7 +214,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('throws if a momentum higher than one is set', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.momentum = 2;
     }).toThrow();
@@ -218,7 +222,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('throws if exaggeration is set to a value lower than one', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.exaggeration = 0.9;
     }).toThrow();
@@ -226,7 +230,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('does not throw if exaggeration is set to one', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.exaggeration = 1;
     }).not.toThrow();
@@ -236,7 +240,7 @@ describe('TSNEOptimizer class', () => {
   it('accpets only piecewise linear exaggeration greater' +
          ' than or equal to 1 (0)',
      () => {
-       const tsne = new tf_tsne.TSNEOptimizer(100, false);
+       const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
        const ex = [{iteration: 0, value: 2}, {iteration: 100, value: 0.5}];
        expect(() => {
          tsne.exaggeration = ex;
@@ -247,7 +251,7 @@ describe('TSNEOptimizer class', () => {
   it('accpets only piecewise linear exaggeration greater' +
          ' than or equal to 1 (1)',
      () => {
-       const tsne = new tf_tsne.TSNEOptimizer(100, false);
+       const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
        const ex = [{iteration: 0, value: 0}];
        expect(() => {
          tsne.exaggeration = ex;
@@ -256,7 +260,7 @@ describe('TSNEOptimizer class', () => {
      });
 
   it('accpets exaggeration functions with non negative iteratiosn (0)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 0, value: 2}, {iteration: -100, value: 0.5}];
     expect(() => {
       tsne.exaggeration = ex;
@@ -265,7 +269,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('accpets exaggeration functions with non negative iteratiosn (0)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: -100, value: 0.5}];
     expect(() => {
       tsne.exaggeration = ex;
@@ -274,7 +278,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('accpets exaggeration functions (domain is always increasing 1)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 200, value: 2}, {iteration: 100, value: 1}];
     expect(() => {
       tsne.exaggeration = ex;
@@ -283,7 +287,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('accpets exaggeration functions (domain is always increasing 2)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 200, value: 2}, {iteration: 200, value: 1}];
     expect(() => {
       tsne.exaggeration = ex;
@@ -292,7 +296,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('throws if a non-positive ETA is set', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.eta = -1000;
     }).toThrow();
@@ -300,7 +304,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('throws if ETA is set to zero', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(() => {
       tsne.eta = 0;
     }).toThrow();
@@ -308,7 +312,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (0)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     expect(tsne.exaggerationAtCurrentIteration).toBeCloseTo(4);
     tsne.exaggeration = 3;
     expect(tsne.exaggerationAtCurrentIteration).toBeCloseTo(3);
@@ -316,7 +320,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (1)', () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 0, value: 3}];
     tsne.exaggeration = ex;
     expect(tsne.exaggerationAtCurrentIteration).toBeCloseTo(3);
@@ -324,7 +328,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (1)', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 0, value: 3}];
     tsne.exaggeration = ex;
 
@@ -340,7 +344,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (2)', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 0, value: 3}, {iteration: 2, value: 1}];
     tsne.exaggeration = ex;
     const knnGraph = dataset_util.generateKNNClusterData(100, 10, 30);
@@ -361,7 +365,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (3)', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 1, value: 3}, {iteration: 3, value: 1}];
     tsne.exaggeration = ex;
 
@@ -388,7 +392,7 @@ describe('TSNEOptimizer class', () => {
   });
 
   it('has proper exaggeration for the current iteration (4)', async () => {
-    const tsne = new tf_tsne.TSNEOptimizer(100, false);
+    const tsne = new tf_tsne.TSNEOptimizer(backend, 100, false);
     const ex = [{iteration: 0, value: 5}, {iteration: 4, value: 1}];
     tsne.exaggeration = ex;
 

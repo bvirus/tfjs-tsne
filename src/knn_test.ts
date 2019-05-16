@@ -20,7 +20,6 @@ import * as tf from '@tensorflow/tfjs-core';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as tf_knn from './knn';
-import { getGLContext } from './get_GPGPU_context';
 
 function iterate(knn: tf_knn.KNNEstimator, knnTechnique: string) {
   if (knnTechnique === 'brute force') {
@@ -34,14 +33,15 @@ function iterate(knn: tf_knn.KNNEstimator, knnTechnique: string) {
   }
 }
 
-function knnIntegrityTests(
+function knnIntegrityTests(backend: tf.webgl.MathBackendWebGL,
     knnTechnique: string, dataTexture: WebGLTexture, dataFormat: RearrangedData,
     numPoints: number, numDimensions: number, numNeighs: number) {
+  
   it(`kNN increments the iterations
       (${knnTechnique}, #neighs: ${numNeighs})`,
      () => {
        const knn = new tf_knn.KNNEstimator(
-           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, false);
+           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, backend, false);
        iterate(knn, knnTechnique);
        expect(knn.iteration).toBe(1);
        iterate(knn, knnTechnique);
@@ -52,7 +52,7 @@ function knnIntegrityTests(
       (${knnTechnique}, #neighs: ${numNeighs})`,
      () => {
        const knn = new tf_knn.KNNEstimator(
-           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, false);
+           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, backend, false);
        // doing some iterations
        iterate(knn, knnTechnique);
        iterate(knn, knnTechnique);
@@ -68,7 +68,7 @@ function knnIntegrityTests(
       (${knnTechnique}, #neighs: ${numNeighs})`,
      () => {
        const knn = new tf_knn.KNNEstimator(
-           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, false);
+           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, backend, false);
        // doing some iterations
        iterate(knn, knnTechnique);
        iterate(knn, knnTechnique);
@@ -84,7 +84,7 @@ function knnIntegrityTests(
       (${knnTechnique}, #neighs: ${numNeighs})`,
      () => {
        const knn = new tf_knn.KNNEstimator(
-           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, false);
+           dataTexture, dataFormat, numPoints, numDimensions, numNeighs, backend, false);
        // doing some iterations
        iterate(knn, knnTechnique);
        iterate(knn, knnTechnique);
@@ -103,7 +103,11 @@ function knnIntegrityTests(
 
 //////////////////////////////////////////////////////
 
-describe('KNN [line]\n', () => {
+describe('KNN [line]\n', async () => {
+  tf.setBackend('webgl');
+  
+  const backend = tf.backend() as tf.webgl.MathBackendWebGL;
+  await tf.ready();
   const numDimensions = 12;
   const pointsPerRow = 10;
   const numRows = 100;
@@ -115,7 +119,7 @@ describe('KNN [line]\n', () => {
       vec[i * numDimensions + d] = 255. * i / numPoints;
     }
   }
-  const gl = getGLContext();
+  const gl = backend.getGPGPUContext().gl;
   const dataTexture = gl_util.createAndConfigureUByteTexture(
       gl, pointsPerRow * numDimensions / 4, numRows, 4, vec);
 
@@ -130,7 +134,7 @@ describe('KNN [line]\n', () => {
     expect(() => {
       // tslint:disable-next-line:no-unused-expression
       new tf_knn.KNNEstimator(
-          dataTexture, dataFormat, numPoints, numDimensions, 129, false);
+          dataTexture, dataFormat, numPoints, numDimensions, 129, backend, false);
     }).toThrow();
   });
 
@@ -138,29 +142,29 @@ describe('KNN [line]\n', () => {
     expect(() => {
       // tslint:disable-next-line:no-unused-expression
       new tf_knn.KNNEstimator(
-          dataTexture, dataFormat, numPoints, numDimensions, 50, false);
+          dataTexture, dataFormat, numPoints, numDimensions, 50, backend, false);
     }).toThrow();
   });
 
   it('kNN initializes iterations to 0', () => {
     const knn = new tf_knn.KNNEstimator(
-        dataTexture, dataFormat, numPoints, numDimensions, 100, false);
+        dataTexture, dataFormat, numPoints, numDimensions, 100, backend, false);
     expect(knn.iteration).toBe(0);
   });
 
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'brute force', dataTexture, dataFormat, numPoints, numDimensions, 100);
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'random sampling', dataTexture, dataFormat, numPoints, numDimensions,
       100);
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'knn descent', dataTexture, dataFormat, numPoints, numDimensions, 100);
 
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'brute force', dataTexture, dataFormat, numPoints, numDimensions, 48);
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'random sampling', dataTexture, dataFormat, numPoints, numDimensions, 48);
-  knnIntegrityTests(
+  knnIntegrityTests(backend,
       'knn descent', dataTexture, dataFormat, numPoints, numDimensions, 48);
 });
 

@@ -160,7 +160,7 @@ export class TSNEOptimizer {
   ///// PUBLIC INTERFACE  ////////
   ////////////////////////////////
 
-  constructor(numPoints: number, verbose?: boolean,
+  constructor(backend: tf.webgl.MathBackendWebGL, numPoints: number, verbose?: boolean,
               splatTextureDiameter?: number, kernelTextureRadius?: number) {
     if (verbose != null) {
       this.verbose = verbose;
@@ -178,7 +178,7 @@ export class TSNEOptimizer {
       throw Error('WebGL version 1 is not supported by tfjs-tsne');
     }
     // Saving the GPGPU context
-    this.backend =  tf.backend() as tf.webgl.MathBackendWebGL;
+    this.backend = backend;
     if (this.backend === null) {
       throw Error('WebGL backend is not available');
     }

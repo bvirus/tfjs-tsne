@@ -14,11 +14,8 @@
  * limitations under the License.
  * =============================================================================
  */
-
-import * as tf from '@tensorflow/tfjs-core';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
-import { getGLContext } from './get_GPGPU_context';
 
 // Returns the GLSL source code needed for
 // computing distances in a rearranged data format
@@ -138,7 +135,7 @@ export function generateMNISTDistanceComputationSource(): string {
 }
 
 // Generates the texture for a KNN containing a number of synthetic clusters
-export function generateKNNClusterTexture(
+export function generateKNNClusterTexture(gl: WebGLRenderingContext,
     numPoints: number, numClusters: number,
     numNeighbors: number): {knnGraph: WebGLTexture, dataShape: RearrangedData} {
   // Computing data shape
@@ -164,7 +161,7 @@ export function generateKNNClusterTexture(
   }
 
   // Generating texture
-  const gl = getGLContext();
+  // const gl = getGLContext();
   const knnGraph = gl_util.createAndConfigureTexture(
       gl, pointsPerRow * numNeighbors, numRows, 2, textureValues);
 
@@ -172,7 +169,7 @@ export function generateKNNClusterTexture(
 }
 
 // Generates the texture for a KNN containing a synthetic line
-export function generateKNNLineTexture(numPoints: number, numNeighbors: number):
+export function generateKNNLineTexture(gl: WebGLRenderingContext, numPoints: number, numNeighbors: number):
     {knnGraph: WebGLTexture, dataShape: RearrangedData} {
   // Computing data shape
   const pointsPerRow =
@@ -196,7 +193,6 @@ export function generateKNNLineTexture(numPoints: number, numNeighbors: number):
   }
 
   // Generating texture
-  const gl = getGLContext();
   const knnGraph = gl_util.createAndConfigureTexture(
       gl, pointsPerRow * numNeighbors, numRows, 2, textureValues);
 

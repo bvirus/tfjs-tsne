@@ -14,7 +14,6 @@
     "url": "https://github.com/tensorflow/tfjs-tsne.git"
   },
   "devDependencies": {
-    "@tensorflow/tfjs-core": "^1.0.0",
     "@types/jasmine": "^2.8.6",
     "clang-format": "~1.2.2",
     "jasmine-core": "^2.99",
@@ -30,7 +29,7 @@
     "rollup-plugin-node-resolve": "~3.3.0",
     "rollup-plugin-typescript2": "~0.13.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.8.3",
+    "typescript": "^3.4.5",
     "uglify-js": "~3.0.28",
     "yalc": "~1.0.0-pre.21"
   },
@@ -46,5 +45,8 @@
     "test": "karma start",
     "test-travis": "karma start --browsers='bs_firefox_mac,bs_chrome_mac' --singleRun"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@tensorflow/tfjs-core": "^1.2.0"
+  }
 }

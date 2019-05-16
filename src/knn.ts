@@ -22,8 +22,6 @@ import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
 import DEBUG_MODE from './debug_mode';
-import getGPGPUContext from './get_GPGPU_context';
-
 // tslint:disable-next-line:no-any
 function instanceOfRearrangedData(object: any): object is RearrangedData {
   return 'numPoints' in object && 'pointsPerRow' in object &&
@@ -69,7 +67,7 @@ export class KNNEstimator {
   constructor(dataTexture: WebGLTexture,
               dataFormat: RearrangedData|CustomDataDefinition,
               numPoints: number, numDimensions: number, numNeighs: number,
-              verbose?: boolean) {
+              backend: tf.webgl.MathBackendWebGL, verbose?: boolean) {
     if (verbose != null) {
       this.verbose = verbose;
     } else {
@@ -77,7 +75,7 @@ export class KNNEstimator {
     }
     // Saving the GPGPU context
     // this.backend = tf.ENV.findBackend('webgl') as tf.webgl.MathBackendWebGL;
-    this.gpgpu = getGPGPUContext();
+    this.gpgpu = backend.getGPGPUContext();
 
     this._iteration = 0;
     this.dataTexture = dataTexture;

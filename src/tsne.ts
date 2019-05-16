@@ -74,6 +74,7 @@ export class TSNE {
   private initialized: boolean;
   private probabilitiesInitialized: boolean;
   private knnMode: 'auto'|'bruteForce';
+  private backend: tf.webgl.MathBackendWebGL;
 
   constructor(data: tf.Tensor, config?: TSNEConfiguration) {
     this.initialized = false;
@@ -109,6 +110,7 @@ export class TSNE {
    * function is called.
    */
   private async initialize(): Promise<void> {
+
     // Default parameters
     let perplexity = 18;
     let exaggeration = 4;
@@ -142,10 +144,14 @@ export class TSNE {
         this.knnMode = this.config.knnMode;
       }
     }
-
+    // get the backend here
+    await tf.setBackend('webgl')
+    
+    this.backend = tf.backend() as tf.webgl.MathBackendWebGL;
+    await tf.ready();
     // Neighbors must be roughly 3*perplexity and a multiple of 4
     this.numNeighbors = Math.floor((perplexity * 3) / 4) * 4;
-    this.packedData = await tensorToDataTexture(this.data);
+    this.packedData = await tensorToDataTexture(this.backend, this.data);
 
     if (this.verbose) {
       console.log(`Number of points:\t${this.numPoints}`);
@@ -156,9 +162,9 @@ export class TSNE {
 
     this.knnEstimator = new KNNEstimator(
         this.packedData.texture, this.packedData.shape, this.numPoints,
-        this.numDimensions, this.numNeighbors, this.verbose);
+        this.numDimensions, this.numNeighbors, this.backend, this.verbose);
 
-    this.optimizer = new TSNEOptimizer(this.numPoints, false);
+    this.optimizer = new TSNEOptimizer(this.backend, this.numPoints, false);
     const exaggerationPolyline = [
       {iteration: exaggerationIter, value: exaggeration},
       {iteration: exaggerationIter + exaggerationDecayIter, value: 1}
@@ -221,9 +227,11 @@ export class TSNE {
    * @param {number} iterations Number of iterations to compute. Default = 1
    */
   async iterateKnn(iterations = 1): Promise<void> {
+    
     if (!this.initialized) {
       await this.initialize();
     }
+    console.log(this.optimizer || 'none');
     this.probabilitiesInitialized = false;
     for (let iter = 0; iter < iterations; ++iter) {
       this.knnEstimator.iterateBruteForce();
@@ -239,6 +247,7 @@ export class TSNE {
    * @param {number} iterations Number of iterations to compute. Default = 1
    */
   async iterate(iterations = 1): Promise<void> {
+    
     if (!this.probabilitiesInitialized) {
       await this.initializeProbabilities();
     }
@@ -263,9 +272,13 @@ export class TSNE {
    * @param normalized boolean indicating whether to normalize
    *                   the coordinates to 0-1 range
    */
-  coordinates(normalized = true): tf.Tensor {
+  async coordinates(normalized = true): Promise<tf.Tensor> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
     if (normalized) {
       return tf.tidy(() => {
+        console.log(this.optimizer || 'no optimizer')
         const rangeX = this.optimizer.maxX - this.optimizer.minX;
         const rangeY = this.optimizer.maxY - this.optimizer.minY;
         const min =
@@ -300,7 +313,7 @@ export class TSNE {
    *                   the coordinates to 0-1 range
    */
   async coordsArray(normalized = true): Promise<number[][]> {
-    const coordsData = await this.coordinates(normalized).data();
+    const coordsData = await (await this.coordinates(normalized)).data();
 
     const coords = [];
     for (let i = 0; i < coordsData.length; i += 2) {
