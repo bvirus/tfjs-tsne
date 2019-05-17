@@ -16,12 +16,16 @@
  */
 
 import * as tf from '@tensorflow/tfjs-core';
-
+import { MathBackendWebGL, GPGPUContext } from '@tensorflow/tfjs-core/dist/webgl';
 import * as dataset_util from './dataset_util';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
 import * as knn_util from './knn_util';
+
+// imports that I'm fixing
+const { createStaticVertexBuffer } = tf.webgl.webgl_util;
 import DEBUG_MODE from './debug_mode';
+
 // tslint:disable-next-line:no-any
 function instanceOfRearrangedData(object: any): object is RearrangedData {
   return 'numPoints' in object && 'pointsPerRow' in object &&
@@ -40,8 +44,8 @@ function instanceOfCustomDataDefinition(object: any):
 
 export class KNNEstimator {
   private verbose: boolean;
-  private backend: tf.webgl.MathBackendWebGL;
-  private gpgpu: tf.webgl.GPGPUContext;
+  private backend: MathBackendWebGL;
+  private gpgpu: GPGPUContext;
 
   private _iteration: number;
   private numNeighs: number;
@@ -67,7 +71,7 @@ export class KNNEstimator {
   constructor(dataTexture: WebGLTexture,
               dataFormat: RearrangedData|CustomDataDefinition,
               numPoints: number, numDimensions: number, numNeighs: number,
-              backend: tf.webgl.MathBackendWebGL, verbose?: boolean) {
+              backend: MathBackendWebGL, verbose?: boolean) {
     if (verbose != null) {
       this.verbose = verbose;
     } else {
@@ -179,7 +183,7 @@ export class KNNEstimator {
       }
     }
     this.log('knn Create static vertex start');
-    this.linesVertexIdBuffer = tf.webgl.webgl_util.createStaticVertexBuffer(
+    this.linesVertexIdBuffer = createStaticVertexBuffer(
         this.gpgpu.gl, DEBUG_MODE, linesVertexId);
     this.log('knn Create programs/buffers done');
   }

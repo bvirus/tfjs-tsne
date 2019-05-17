@@ -151,7 +151,7 @@ export class TSNE {
     await tf.ready();
     // Neighbors must be roughly 3*perplexity and a multiple of 4
     this.numNeighbors = Math.floor((perplexity * 3) / 4) * 4;
-    this.packedData = await tensorToDataTexture(this.backend, this.data);
+    this.packedData = await tensorToDataTexture(this.backend.getGPGPUContext().gl, this.data);
 
     if (this.verbose) {
       console.log(`Number of points:\t${this.numPoints}`);
