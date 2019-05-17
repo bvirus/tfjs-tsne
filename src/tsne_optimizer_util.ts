@@ -17,36 +17,12 @@
 
 import * as tf from '@tensorflow/tfjs-core';
 import * as gl_util from './gl_util';
-import { GPGPUContext } from '@tensorflow/tfjs-core/dist/webgl';
+import { setInputMatrixTexture, uniform1f, uniform2f } from './webgl_util';
 let DEBUG_MODE = false;
 
-const { getProgramUniformLocationOrThrow, bindCanvasToFramebuffer, 
+const { bindCanvasToFramebuffer, 
     callAndCheck, bindVertexBufferToProgramAttribute} = tf.webgl.webgl_util;
 const { bindVertexProgramAttributeStreams } = tf.webgl.gpgpu_util;
-
-/* helper functions that abstract over repeated configuration steps */
-/* they all find the appropriate program location, and then call a function on it */
-export function setInputMatrixTexture(
-  gpgpu: GPGPUContext, program: WebGLProgram, tex: WebGLTexture, x: number, name: string) {
-  const loc = getProgramUniformLocationOrThrow(gpgpu.gl, DEBUG_MODE, program, name);
-  gpgpu.setInputMatrixTexture(tex, loc, x);
-  return loc;
-} 
-
-export function uniform1f(gl: WebGLRenderingContext, program: WebGLProgram, x: number, name: string) {
-  const loc = getProgramUniformLocationOrThrow(gl, DEBUG_MODE, program, name);
-  gl.uniform1f(loc, x);
-  return loc;
-} 
-
-export function uniform2f(gl: WebGLRenderingContext, program: WebGLProgram, x: number, y: number, name: string) {
-  const loc =
-    getProgramUniformLocationOrThrow(gl, DEBUG_MODE, program, name);
-  gl.uniform2f(loc, x, y);
-  return loc;
-}
-
-
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
@@ -428,7 +404,7 @@ export function executeAttractiveForcesComputationProgram(
     neighProbTex: WebGLTexture, numPoints: number, neighsPerRow: number,
     pntsPerRow: number, numRows: number, eta: number,
     targetTex?: WebGLTexture) {
-  const gl = gpgpu.gl;
+
   if (targetTex != null) {
     gpgpu.setOutputMatrixTexture(targetTex, numRows, pntsPerRow * 2);
   } else {
@@ -696,7 +672,7 @@ export function executeGaussiaDistributionsFromDistancesProgram(
     gpgpu: tf.webgl.GPGPUContext, program: WebGLProgram, knnGraph: WebGLTexture,
     parameters: WebGLTexture, numPoints: number, numNeighs: number,
     pntsPerRow: number, numRows: number, targetTex?: WebGLTexture) {
-  const gl = gpgpu.gl;
+
   if (targetTex != null) {
     gpgpu.setOutputMatrixTexture(targetTex, numRows, pntsPerRow * numNeighs);
   } else {
