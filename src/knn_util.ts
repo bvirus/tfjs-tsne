@@ -585,16 +585,17 @@ export function executeKNNProgram(
 
 export function createCopyDistancesProgram(gpgpu: GPGPUContext):
     WebGLProgram {
-  const fragmentShaderSource = `
+  const fragmentShaderSource = `#version 300 es
     precision highp float;
     uniform sampler2D knn_tex;
     uniform float width;
     uniform float height;
+    out vec4 fragColor;
 
     void main() {
       vec2 coordinates = gl_FragCoord.xy / vec2(width,height);
-      float distance = texture2D(knn_tex,coordinates).g;
-      gl_FragColor = vec4(distance,0,0,1);
+      float distance = texture(knn_tex,coordinates).g;
+      fragColor = vec4(distance,0,0,1);
     }
   `;
   return gpgpu.createProgram(fragmentShaderSource);
@@ -634,19 +635,20 @@ export function executeCopyDistancesProgram(
 
 export function createCopyIndicesProgram(gpgpu: GPGPUContext):
     WebGLProgram {
-  const fragmentShaderSource = `
+  const fragmentShaderSource = `#version 300 es
     precision highp float;
     uniform sampler2D knn_tex;
     uniform float width;
     uniform float height;
+    out vec4 fragColor;
 
     void main() {
       vec2 coordinates = gl_FragCoord.xy / vec2(width,height);
-      float id = texture2D(knn_tex,coordinates).r;
-      gl_FragColor = vec4(id,0,0,1);
+      float id = texture(knn_tex,coordinates).r;
+      fragColor = vec4(id,0,0,1);
 
       if(id < 0.) {
-        gl_FragColor.b = 1.;
+        fragColor.b = 1.;
       }
     }
   `;
