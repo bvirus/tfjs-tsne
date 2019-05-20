@@ -231,7 +231,7 @@ export class TSNE {
     if (!this.initialized) {
       await this.initialize();
     }
-    console.log(this.optimizer || 'none');
+
     this.probabilitiesInitialized = false;
     for (let iter = 0; iter < iterations; ++iter) {
       this.knnEstimator.iterateBruteForce();
