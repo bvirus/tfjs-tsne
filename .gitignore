@@ -6,3 +6,4 @@ coverage/
 .cache
 *cache
 .DS_STORE
+yarn.lock

@@ -16,7 +16,6 @@
  */
 
 import { webgl } from '@tensorflow/tfjs-core';
-import { GPGPUContext } from '@tensorflow/tfjs-core/dist/webgl';
 import * as gl_util from './gl_util';
 import DEBUG_MODE from './debug_mode';
 
@@ -277,7 +276,7 @@ const vertexPositionSource = `
 ///////////////////////////////////////////////////////////
 
 export function createBruteForceKNNProgram(
-    gpgpu: GPGPUContext, numNeighbors: number,
+    gpgpu: webgl.GPGPUContext, numNeighbors: number,
     distanceComputationSource: string): WebGLProgram {
   const vertexShaderSource = `#version 300 es
     ` +
@@ -337,7 +336,7 @@ export function createBruteForceKNNProgram(
 ///////////////////////////////////////////////////////////
 
 export function createRandomSamplingKNNProgram(
-    gpgpu: GPGPUContext, numNeighbors: number,
+    gpgpu: webgl.GPGPUContext, numNeighbors: number,
     distanceComputationSource: string): WebGLProgram {
   const vertexShaderSource = `#version 300 es
     ` +
@@ -402,7 +401,7 @@ export function createRandomSamplingKNNProgram(
 ///////////////////////////////////////////////////////////
 
 export function createKNNDescentProgram(
-    gpgpu: GPGPUContext, numNeighbors: number,
+    gpgpu: webgl.GPGPUContext, numNeighbors: number,
     distanceComputationSource: string): WebGLProgram {
   const vertexShaderSource = `#version 300 es
     ` +
@@ -511,7 +510,7 @@ export interface RearrangedData {
   numRows: number;
 }
 export function executeKNNProgram(
-    gpgpu: GPGPUContext, program: WebGLProgram, dataTex: WebGLTexture,
+    gpgpu: webgl.GPGPUContext, program: WebGLProgram, dataTex: WebGLTexture,
     startingKNNTex: WebGLTexture, iteration: number, knnShape: RearrangedData,
     vertexIdBuffer: WebGLBuffer, targetTex?: WebGLTexture) {
   const gl = gpgpu.gl;
@@ -583,7 +582,7 @@ export function executeKNNProgram(
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
-export function createCopyDistancesProgram(gpgpu: GPGPUContext):
+export function createCopyDistancesProgram(gpgpu: webgl.GPGPUContext):
     WebGLProgram {
   const fragmentShaderSource = `#version 300 es
     precision highp float;
@@ -602,7 +601,7 @@ export function createCopyDistancesProgram(gpgpu: GPGPUContext):
 }
 
 export function executeCopyDistancesProgram(
-    gpgpu: GPGPUContext, program: WebGLProgram, knnTex: WebGLTexture,
+    gpgpu: webgl.GPGPUContext, program: WebGLProgram, knnTex: WebGLTexture,
     knnShape: RearrangedData, targetTex?: WebGLTexture) {
   const gl = gpgpu.gl;
   if (targetTex != null) {
@@ -633,7 +632,7 @@ export function executeCopyDistancesProgram(
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
 
-export function createCopyIndicesProgram(gpgpu: GPGPUContext):
+export function createCopyIndicesProgram(gpgpu: webgl.GPGPUContext):
     WebGLProgram {
   const fragmentShaderSource = `#version 300 es
     precision highp float;
@@ -656,7 +655,7 @@ export function createCopyIndicesProgram(gpgpu: GPGPUContext):
 }
 
 export function executeCopyIndicesProgram(
-    gpgpu: GPGPUContext, program: WebGLProgram, knnTex: WebGLTexture,
+    gpgpu: webgl.GPGPUContext, program: WebGLProgram, knnTex: WebGLTexture,
     knnShape: RearrangedData, targetTex?: WebGLTexture) {
   const gl = gpgpu.gl;
   if (targetTex != null) {

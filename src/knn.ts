@@ -16,7 +16,6 @@
  */
 
 import * as tf from '@tensorflow/tfjs-core';
-import { MathBackendWebGL, GPGPUContext } from '@tensorflow/tfjs-core/dist/webgl';
 import * as dataset_util from './dataset_util';
 import * as gl_util from './gl_util';
 import {RearrangedData} from './interfaces';
@@ -44,8 +43,8 @@ function instanceOfCustomDataDefinition(object: any):
 
 export class KNNEstimator {
   private verbose: boolean;
-  private backend: MathBackendWebGL;
-  private gpgpu: GPGPUContext;
+  private backend: tf.webgl.MathBackendWebGL;
+  private gpgpu: tf.webgl.GPGPUContext;
 
   private _iteration: number;
   private numNeighs: number;
@@ -71,7 +70,7 @@ export class KNNEstimator {
   constructor(dataTexture: WebGLTexture,
               dataFormat: RearrangedData|CustomDataDefinition,
               numPoints: number, numDimensions: number, numNeighs: number,
-              backend: MathBackendWebGL, verbose?: boolean) {
+              backend: tf.webgl.MathBackendWebGL, verbose?: boolean) {
     if (verbose != null) {
       this.verbose = verbose;
     } else {
