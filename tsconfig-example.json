@@ -1,0 +1,6 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "./examples/create-react-app-test/node_modules/tfjs-tsne"
+    }
+  }

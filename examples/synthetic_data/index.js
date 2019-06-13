@@ -20,6 +20,7 @@ import * as d3 from 'd3';
 
 import * as tsne from '../../src/index';
 
+
 /**
  * Run the example
  */

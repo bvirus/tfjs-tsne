@@ -1,13 +1,10 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import * as tf from '@tensorflow/tfjs-core';
-import * as tsne from 'dist-es6';
 
 
 function App() {
 
-  console.log(tsne);
   return (
     <div className="App">
       <header className="App-header">
